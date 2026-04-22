@@ -1,0 +1,16 @@
+function_name,c_loc,rust_loc,rounds,first_try_compiled,first_try_tested,used_unsafe,human_intervention,tags,notes
+# 实验进行中按函数填入，每行一条记录
+# 字段说明：
+#   function_name: 被翻译的 C 函数名（如 next_token / te_compile）
+#   c_loc: 原 C 代码行数
+#   rust_loc: 翻译后 Rust 代码行数
+#   rounds: Claude Code 从首次输出到最终通过的修正轮次
+#   first_try_compiled: 首次输出是否编译通过（yes/no）
+#   first_try_tested: 首次输出是否测试通过（yes/no）
+#   used_unsafe: 最终是否含 unsafe（yes/no）
+#   human_intervention: 人工介入类型（none/hint/redesign）
+#   tags: 难题分类标签（用分号分隔，如 "union;ownership"）
+#   notes: 备注
+# 示例：
+# pi,2,1,1,yes,yes,no,none,none,"最简单的常量函数"
+# next_token,82,95,3,no,no,no,hint,"ownership;lifetime","指针推进模式需要提示"

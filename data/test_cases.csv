@@ -1,0 +1,86 @@
+category,expression,expected_behavior,notes
+# 对照测试用例集。同一表达式喂给 C 版 repl.exe 和 Rust 版 repl，输出必须一致（或按容差）
+# category 用于分组统计通过率
+# expected_behavior 仅作参考（真正的 oracle 是 C 版输出）
+
+# === 基本运算 ===
+basic,1+1,数值 2,
+basic,1-1,数值 0,
+basic,2*3,数值 6,
+basic,10/4,数值 2.5,
+basic,2^10,数值 1024,幂运算
+basic,10%3,数值 1,取模
+basic,-5,数值 -5,一元负号
+basic,--5,数值 5,连续一元
+
+# === 优先级 ===
+precedence,1+2*3,数值 7,乘法优先
+precedence,(1+2)*3,数值 9,括号改变优先级
+precedence,2^3^2,数值 64 或 512,指数结合性（C 版是左结合 = 64）
+precedence,1+2-3,数值 0,同级从左到右
+precedence,2*3/2,数值 3,
+
+# === 内置数学函数 ===
+math,abs(-5),数值 5,
+math,sqrt(4),数值 2,
+math,sqrt(2),约 1.414...,无理数
+math,sin(0),数值 0,
+math,cos(0),数值 1,
+math,tan(0),数值 0,
+math,exp(0),数值 1,
+math,exp(1),约 2.718...,e
+math,log(100),数值 2,log10
+math,ln(1),数值 0,
+math,pow(2,10),数值 1024,双参数
+math,atan2(1,1),约 0.785...,π/4
+math,ceil(1.5),数值 2,
+math,floor(1.5),数值 1,
+
+# === 常量 ===
+constant,pi(),约 3.14159...,
+constant,e(),约 2.71828...,
+
+# === 嵌套和复合 ===
+nested,sqrt(3^2+4^2),数值 5,勾股
+nested,sin(pi()/2),约 1,
+nested,cos(pi()),约 -1,
+nested,sqrt(sqrt(16)),数值 2,
+
+# === 浮点特殊值 ===
+special,1/0,+inf,除零
+special,-1/0,-inf,负除零
+special,0/0,NaN,未定型
+special,sqrt(-1),NaN,负数开方
+special,log(0),-inf,
+special,log(-1),NaN,
+special,ln(0),-inf,
+
+# === 语法错误 ===
+error,"(1+",解析错误,右括号缺失
+error,"1+)",解析错误,意外符号
+error,"1+",解析错误,操作数缺失
+error,"*1",解析错误,开头运算符
+error,"sin",解析错误,函数未调用
+error,"sin(",解析错误,参数缺失
+error,"sin(1,2)",解析错误,参数数量错误
+error,"abc",解析错误,未知标识符
+
+# === 空和边界 ===
+edge,"",行为 TBD,空输入
+edge," ",行为 TBD,仅空格
+edge,"1",数值 1,单数字
+edge,"(1)",数值 1,冗余括号
+edge,"((((1))))",数值 1,深嵌套括号
+
+# === 小数 ===
+decimal,0.1+0.2,约 0.3（注意浮点精度）,经典浮点陷阱
+decimal,.5,数值 0.5,前导 .
+decimal,1.,数值 1,尾随 .
+decimal,1e10,数值 10000000000,科学计数
+decimal,1.5e-3,数值 0.0015,负指数
+
+# === 大数和精度 ===
+magnitude,1e308,接近 f64 上限,
+magnitude,1e-308,接近 f64 下限,
+magnitude,1e400,+inf,溢出
+magnitude,2^53,数值 9007199254740992,f64 整数精度边界

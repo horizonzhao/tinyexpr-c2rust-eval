@@ -1,0 +1,39 @@
+# Rust
+/tinyexpr-rs/target/
+/tinyexpr-rs/Cargo.lock
+**/*.rs.bk
+
+# C 构建产物（保留源码，忽略二进制）
+/tinyexpr-c/*.exe
+/tinyexpr-c/*.o
+/tinyexpr-c/*.obj
+/tinyexpr-c/smoke
+/tinyexpr-c/repl
+/tinyexpr-c/benchmark
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 临时 / 本地测试
+/tmp/
+/scratch/
+*.log
+!logs/raw-journal.md     # 例外：原始日志要提交
+
+# 对照测试输出（由脚本生成）
+/tinyexpr-rs/compare_result.csv
+/compare_result.csv
+
+# Python（如果有辅助脚本）
+__pycache__/
+*.pyc
+.venv/

@@ -1,0 +1,211 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  # ==============================================================
+  # 任务 1：Rust 代码格式、静态检查、单元测试
+  # ==============================================================
+  rust-quality:
+    name: Rust Quality Checks
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust (stable-x86_64-pc-windows-gnu)
+        run: |
+          rustup toolchain install stable-x86_64-pc-windows-gnu --profile minimal --component rustfmt,clippy
+          rustup default stable-x86_64-pc-windows-gnu
+          rustc --version
+          cargo --version
+
+      - name: Check tinyexpr-rs exists
+        id: check_rs
+        run: |
+          if (Test-Path "tinyexpr-rs/Cargo.toml") {
+            "exists=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          } else {
+            "exists=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+            Write-Host "tinyexpr-rs/ 不存在，跳过 Rust 检查（实验早期正常）"
+          }
+
+      - name: Cargo fmt check
+        if: steps.check_rs.outputs.exists == 'true'
+        working-directory: tinyexpr-rs
+        run: cargo fmt --all -- --check
+
+      - name: Cargo clippy
+        if: steps.check_rs.outputs.exists == 'true'
+        working-directory: tinyexpr-rs
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Cargo test
+        if: steps.check_rs.outputs.exists == 'true'
+        working-directory: tinyexpr-rs
+        run: cargo test --all
+
+      - name: Cargo build release
+        if: steps.check_rs.outputs.exists == 'true'
+        working-directory: tinyexpr-rs
+        run: cargo build --release
+
+  # ==============================================================
+  # 任务 2：C vs Rust 对照测试
+  # ==============================================================
+  compare-test:
+    name: C vs Rust Comparison
+    runs-on: windows-latest
+    needs: rust-quality
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust
+        run: |
+          rustup toolchain install stable-x86_64-pc-windows-gnu --profile minimal
+          rustup default stable-x86_64-pc-windows-gnu
+
+      - name: Setup MinGW gcc
+        run: |
+          # Windows runner 自带 MinGW gcc
+          gcc --version
+
+      - name: Check tinyexpr-rs exists
+        id: check_rs
+        run: |
+          if (Test-Path "tinyexpr-rs/Cargo.toml") {
+            "exists=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          } else {
+            "exists=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          }
+
+      - name: Clone tinyexpr (C reference)
+        if: steps.check_rs.outputs.exists == 'true'
+        run: |
+          if (-not (Test-Path "tinyexpr-c")) {
+            git clone --depth 1 https://github.com/codeplea/tinyexpr.git tinyexpr-c
+          }
+
+      - name: Build C reference
+        if: steps.check_rs.outputs.exists == 'true'
+        working-directory: tinyexpr-c
+        run: |
+          gcc -O2 -o repl.exe repl.c tinyexpr.c -lm
+
+      - name: Build Rust version
+        if: steps.check_rs.outputs.exists == 'true'
+        working-directory: tinyexpr-rs
+        run: cargo build --release
+
+      - name: Run comparison test
+        if: steps.check_rs.outputs.exists == 'true'
+        run: .\scripts\compare.ps1
+
+      - name: Upload compare result
+        if: steps.check_rs.outputs.exists == 'true' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compare-result
+          path: data/compare_result.csv
+          if-no-files-found: ignore
+
+  # ==============================================================
+  # 任务 3：指标提取（生成 metrics_summary.md 作为 PR artifact）
+  # ==============================================================
+  metrics-extraction:
+    name: Metrics Summary
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate metrics summary
+        run: .\scripts\collect_metrics.ps1
+
+      - name: Generate findings candidates
+        run: .\scripts\generate_findings.ps1
+        continue-on-error: true  # 日志可能为空，不应阻塞 CI
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: metrics-and-findings
+          path: |
+            data/metrics_summary.md
+            data/findings_candidates.md
+          if-no-files-found: ignore
+
+  # ==============================================================
+  # 任务 4：文档健康检查（链接、格式、编码）
+  # ==============================================================
+  docs-check:
+    name: Docs Health Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check required docs exist
+        run: |
+          set -e
+          required=(
+            "README.md"
+            "METHODOLOGY.md"
+            "FINDINGS.md"
+            "CONCLUSIONS.md"
+            "LIMITATIONS.md"
+            "CONTRIBUTING.md"
+            "LICENSE"
+            "docs/01-background.md"
+            "docs/02-setup.md"
+            "docs/03-phase-by-phase.md"
+            "docs/05-ai-observation.md"
+            "docs/04-deep-dive/parser-translation.md"
+            "docs/04-deep-dive/union-to-enum.md"
+            "docs/04-deep-dive/ownership-decisions.md"
+            "docs/04-deep-dive/float-semantics.md"
+            ".claude/CLAUDE.md"
+            ".claude/prompts/00-startup.md"
+            "logs/raw-journal.md"
+            "data/metrics.csv"
+            "data/test_cases.csv"
+          )
+          for f in "${required[@]}"; do
+            if [[ ! -f "$f" ]]; then
+              echo "::error::缺失必需文档：$f"
+              exit 1
+            fi
+          done
+          echo "所有必需文档都存在"
+
+      - name: Markdown lint
+        uses: DavidAnson/markdownlint-cli2-action@v16
+        continue-on-error: true
+        with:
+          globs: |
+            **/*.md
+            !tinyexpr-c/**
+            !tinyexpr-rs/target/**
+
+      - name: Check UTF-8 encoding
+        run: |
+          set -e
+          fail=0
+          for f in $(find . -name "*.md" -not -path "./tinyexpr-c/*" -not -path "./tinyexpr-rs/target/*"); do
+            if ! iconv -f UTF-8 -t UTF-8 "$f" > /dev/null 2>&1; then
+              echo "::error::非 UTF-8 文件：$f"
+              fail=1
+            fi
+          done
+          exit $fail
