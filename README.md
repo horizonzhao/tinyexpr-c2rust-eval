@@ -1,6 +1,6 @@
 # Claude Code 在 C→Rust 翻译任务上的评测
 
-本仓库记录将 [codeplea/tinyexpr](https://github.com/codeplea/tinyexpr)（约 500 LOC）翻译为 Rust 的全过程，并据此评估 Claude Code 在中小规模 C→Rust 迁移中的能力边界。
+本仓库记录将 [codeplea/tinyexpr](https://github.com/codeplea/tinyexpr)（约 500 LoC）翻译为 Rust 的全过程，并据此评估 Claude Code 在中小规模 C→Rust 迁移中的能力边界。
 
 ## 研究问题
 
@@ -10,7 +10,7 @@
 
 ## 数据与产物
 
-- `tinyexpr-c/`：C 基准实现（黄金标准）
+- `tinyexpr-c/`：C 基准实现
 - `tinyexpr-rs/`：Rust 翻译产物
 - `data/metrics.csv`：函数级量化指标
 - `data/test_cases.csv`：C/Rust 对照测试集
@@ -35,7 +35,7 @@ cargo test
 
 - `METHODOLOGY.md`：实验设计、流程与指标定义
 - `FINDINGS.md`：可复核的关键发现
-- `CONCLUSIONS.md`：能力画像与结论
+- `CONCLUSIONS.md`：性能结论
 - `LIMITATIONS.md`：外推边界与偏差来源
 - `STRUCTURE.md`：仓库结构与信息流
 
