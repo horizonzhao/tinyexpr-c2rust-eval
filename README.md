@@ -27,6 +27,8 @@ cargo test
 ..\scripts\compare.ps1
 ```
 
+仓库根目录已提供 `rust-toolchain.toml`，固定工具链为 `stable-x86_64-pc-windows-gnu`；进入仓库后执行 `cargo` 会自动使用该工具链。
+
 完整流程见 `CONTRIBUTING.md` 与 `docs/02-setup.md`。
 
 ## 文档导航

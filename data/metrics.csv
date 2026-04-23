@@ -3,14 +3,23 @@ function_name,c_loc,rust_loc,rounds,first_try_compiled,first_try_tested,used_uns
 # 字段说明：
 #   function_name: 被翻译的 C 函数名（如 next_token / te_compile）
 #   c_loc: 原 C 代码行数
-#   rust_loc: 翻译后 Rust 代码行数
+#   rust_loc: 翻译后 Rust 代码行数（含类型定义，不含测试）
 #   rounds: Claude Code 从首次输出到最终通过的修正轮次
 #   first_try_compiled: 首次输出是否编译通过（yes/no）
 #   first_try_tested: 首次输出是否测试通过（yes/no）
 #   used_unsafe: 最终是否含 unsafe（yes/no）
 #   human_intervention: 人工介入类型（none/hint/redesign）
-#   tags: 难题分类标签（用分号分隔，如 "union;ownership"）
+#   tags: 难题分类标签（用分号分隔）
 #   notes: 备注
-# 示例：
-# pi,2,1,1,yes,yes,no,none,none,"最简单的常量函数"
-# next_token,82,95,3,no,no,no,hint,"ownership;lifetime","指针推进模式需要提示"
+Expr_types,10,154,1,yes,yes,no,hint,union;ownership,"te_expr C struct+union → Rust enum(Expr/NativeFn/NativeClosure/TeVariable/Token/InfixOp)；用户确认选策略A"
+new_expr_te_free,27,0,1,yes,yes,no,none,ownership,"new_expr+te_free_parameters+te_free → Box::new+Drop自动析构；无需翻译"
+math_helpers,31,38,1,yes,yes,no,none,float,"fac/ncr/npr/pi/e；C unsigned long(32bit on Win) → Rust u64，溢出边界略宽，不影响正确性"
+builtins_table,52,55,1,yes,yes,no,none,fnptr,"functions[]+find_builtin(binary search)+find_lookup；闭包fn ptr可存入NativeFn，无需named fn"
+next_token,65,75,2,yes,no,no,none,fnptr;idiom,"首轮用fn ptr存Infix token，编译器警告LTO下地址不唯一→主动重设计为InfixOp enum；模型自主发现并修复"
+parser,193,115,1,yes,yes,no,none,recursion;ownership,"base/power/factor/term/expr/list六函数；C CHECK_NULL宏 → ?运算符；代码量减少40%"
+te_eval,39,30,1,yes,yes,yes,none,union;fnptr,"Variable(*const f64)解引用是唯一unsafe点；function/closure dispatch via enum match"
+optimize,24,15,1,yes,yes,no,none,ownership,"**n = Expr::Constant(val) 原地替换Box内容；NLL正确分离mut borrow(args)与后续eval+写回"
+te_compile,26,25,2,yes,no,no,none,error,"unit tests通过但error position写死-1；集成测试发现→改为s.error_pos()；2轮"
+te_interp,12,7,1,yes,yes,no,none,none,"平凡包装，1轮"
+repl_format_g,85,56,1,yes,yes,no,none,float,"C printf(%g) vs Rust {}差异显著(1e+06 vs 1000000)；实现format_g复现6位有效数字+科学计数规则"
+te_print,29,0,-,-,-,-,-,-,"未实现；compare.ps1不测，实验目标不要求"

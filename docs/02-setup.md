@@ -9,6 +9,7 @@
 - 其他：Git、PowerShell、Claude Code
 
 版本信息建议写入 `data/environment.txt`。
+仓库根目录的 `rust-toolchain.toml` 已固定 Rust 工具链；在仓库内执行 `cargo` 时通常无需手动 `rustup default`。
 
 ## 2. 初始化
 

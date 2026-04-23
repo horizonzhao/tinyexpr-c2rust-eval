@@ -1,0 +1,15 @@
+﻿[package]
+name = "tinyexpr-rs"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "tinyexpr_rs"
+path = "src/lib.rs"
+
+[[bin]]
+name = "repl"
+path = "src/bin/repl.rs"
+
+[profile.release]
+lto = true
