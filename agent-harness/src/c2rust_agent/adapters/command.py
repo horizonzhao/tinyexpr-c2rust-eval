@@ -25,6 +25,7 @@ class CommandAgent(AgentAdapter):
                 "id": task.id,
                 "title": task.title,
                 "problem": task.problem,
+                "repository_root": str(task.repository_root),
                 "allowed_paths": task.allowed_paths,
                 "read_only_paths": task.read_only_paths,
             },
@@ -34,6 +35,7 @@ class CommandAgent(AgentAdapter):
         }
         completed = subprocess.run(
             self.command,
+            cwd=task.repository_root,
             input=json.dumps(request),
             capture_output=True,
             text=True,
@@ -46,4 +48,3 @@ class CommandAgent(AgentAdapter):
                 message=f"External agent failed ({completed.returncode}): {completed.stderr.strip()}",
             )
         return Action.from_dict(json.loads(completed.stdout))
-

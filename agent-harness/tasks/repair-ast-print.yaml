@@ -1,0 +1,17 @@
+id: repair-ast-print
+title: 补全 AST 结构化打印
+problem: >-
+  print_expr 仍是占位实现。补全常量、变量、加法、乘法和函数调用的递归打印，
+  运算节点必须显式加括号，函数参数使用逗号加空格分隔。
+repository_root: ../benchmarks/ast-print
+workspace_mode: copy
+policy:
+  allowed_paths: [src]
+  read_only_paths: [Cargo.toml, Cargo.lock, tests]
+  allowed_command_prefixes: [cargo test, cargo clippy, cargo fmt]
+budget: {max_steps: 30, max_seconds: 1200}
+verify:
+  - {name: format, command: "cargo fmt --all -- --check", weight: 1}
+  - {name: clippy, command: "cargo clippy --all-targets -- -D warnings", weight: 2}
+  - {name: behavior, command: "cargo test --all", weight: 7}
+metadata: {category: missing-feature, source_finding: te_print}

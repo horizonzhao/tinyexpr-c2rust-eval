@@ -27,7 +27,7 @@ fn format_g(v: f64) -> String {
         .and_then(|s| s.parse().ok())
         .unwrap_or(0);
 
-    if exp >= -4 && exp < 6 {
+    if (-4..6).contains(&exp) {
         // Fixed notation: PREC-1-exp decimal places (clamped to 0)
         let dec = (5 - exp).max(0) as usize;
         trim_zeros(format!("{:.prec$}", v, prec = dec))

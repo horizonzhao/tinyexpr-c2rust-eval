@@ -15,6 +15,7 @@ def write_report(run_dir: Path, summary: dict[str, Any]) -> None:
         "",
         f"- Agent: `{summary['agent']}`",
         f"- Status: **{summary['status']}**",
+        f"- Score: **{summary['score']['total']}/{summary['score']['max']}**",
         f"- Steps: {summary['steps']}",
         f"- Duration: {summary['duration_ms']} ms",
         f"- Changed files: {len(summary['changed_files'])}",
@@ -22,13 +23,19 @@ def write_report(run_dir: Path, summary: dict[str, Any]) -> None:
         "",
         "## Verification",
         "",
-        "| Command | Result | Duration |",
-        "|---|---:|---:|",
+        "| Check | Command | Weight | Result | Duration |",
+        "|---|---|---:|---:|---:|",
     ]
     for item in verification:
-        command = str(item["spec"]["command"]).replace("|", "\\|")
+        spec = item["spec"]
+        command = str(spec["command"]).replace("|", "\\|")
         result = "PASS" if item["passed"] else "FAIL"
-        lines.append(f"| `{command}` | {result} | {item['duration_ms']} ms |")
+        lines.append(
+            f"| {spec['name']} | `{command}` | {spec['weight']} | {result} | {item['duration_ms']} ms |"
+        )
+    lines.extend(["", "## Score", "", "| Dimension | Score |", "|---|---:|"])
+    for name, value in summary["score"]["breakdown"].items():
+        lines.append(f"| {name} | {value} |")
     lines.extend(["", "## Changed Files", ""])
     lines.extend(f"- `{path}`" for path in summary["changed_files"])
     if not summary["changed_files"]:

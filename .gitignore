@@ -32,11 +32,13 @@ desktop.ini
 # 对照测试输出（由脚本生成）
 /tinyexpr-rs/compare_result.csv
 /compare_result.csv
+/data/compare_result.csv
 
 # Python（如果有辅助脚本）
 __pycache__/
 *.pyc
 .venv/
+**/.env
 
 tinyexpr-c/
 tinyexpr-rs/.claude/settings.local.json

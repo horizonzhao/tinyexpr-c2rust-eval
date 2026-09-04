@@ -21,13 +21,25 @@ def load_task(path: Path) -> Task:
     budget_raw = raw.get("budget", {})
     verify = tuple(
         VerifyCommand(
+            name=str(item.get("name", f"check-{index}")),
             command=str(item["command"]),
             cwd=str(item.get("cwd", ".")),
             timeout_seconds=int(item.get("timeout_seconds", 300)),
+            weight=float(item.get("weight", 1.0)),
+            required=bool(item.get("required", True)),
         )
-        for item in raw["verify"]
+        for index, item in enumerate(raw["verify"], start=1)
     )
     repository_root = (path.parent / str(raw["repository_root"])).resolve()
+    if not repository_root.is_dir():
+        raise ValueError(f"repository_root does not exist: {repository_root}")
+    if not verify:
+        raise ValueError("task must define at least one verification command")
+    if any(item.weight <= 0 for item in verify):
+        raise ValueError("verification weights must be positive")
+    workspace_mode = str(raw.get("workspace_mode", "copy"))
+    if workspace_mode not in {"copy", "in_place"}:
+        raise ValueError(f"unsupported workspace_mode: {workspace_mode}")
 
     return Task(
         id=str(raw["id"]),
@@ -42,6 +54,6 @@ def load_task(path: Path) -> Task:
             max_steps=int(budget_raw.get("max_steps", 30)),
             max_seconds=int(budget_raw.get("max_seconds", 1800)),
         ),
+        workspace_mode=workspace_mode,
         metadata=dict(raw.get("metadata", {})),
     )
-

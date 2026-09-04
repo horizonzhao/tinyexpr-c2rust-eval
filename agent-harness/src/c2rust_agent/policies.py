@@ -31,6 +31,15 @@ def check_action(task: Task, action: Action) -> tuple[bool, str]:
             return False, f"path is outside allowed_paths: {relative}"
         return True, "allowed"
 
+    if action.type in {"read_file", "list_files", "search_code"}:
+        try:
+            resolve_inside(task.repository_root, action.path or ".")
+        except ValueError as exc:
+            return False, str(exc)
+        if action.type == "search_code" and not action.pattern:
+            return False, "search_code requires pattern"
+        return True, "allowed"
+
     if action.type == "run_command":
         if not action.command:
             return False, "run_command requires command"

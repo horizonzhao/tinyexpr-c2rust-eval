@@ -7,9 +7,12 @@ from typing import Any
 
 @dataclass(frozen=True)
 class VerifyCommand:
+    name: str
     command: str
     cwd: str = "."
     timeout_seconds: int = 300
+    weight: float = 1.0
+    required: bool = True
 
 
 @dataclass(frozen=True)
@@ -29,6 +32,7 @@ class Task:
     allowed_command_prefixes: tuple[str, ...]
     verify: tuple[VerifyCommand, ...]
     budget: Budget
+    workspace_mode: str = "copy"
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
@@ -39,6 +43,7 @@ class Action:
     cwd: str = "."
     path: str | None = None
     content: str | None = None
+    pattern: str | None = None
     message: str = ""
 
     @classmethod
@@ -49,6 +54,6 @@ class Action:
             cwd=str(value.get("cwd", ".")),
             path=value.get("path"),
             content=value.get("content"),
+            pattern=value.get("pattern"),
             message=str(value.get("message", "")),
         )
-

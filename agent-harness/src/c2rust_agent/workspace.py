@@ -19,9 +19,10 @@ def resolve_inside(root: Path, relative: str) -> Path:
 def snapshot(root: Path) -> dict[str, str]:
     result: dict[str, str] = {}
     for path in sorted(root.rglob("*")):
-        if not path.is_file() or any(part in IGNORED_PARTS for part in path.parts):
+        relative_path = path.relative_to(root)
+        if not path.is_file() or any(part in IGNORED_PARTS for part in relative_path.parts):
             continue
-        relative = path.relative_to(root).as_posix()
+        relative = relative_path.as_posix()
         result[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
     return result
 
@@ -32,4 +33,3 @@ def changed_files(before: dict[str, str], after: dict[str, str]) -> list[str]:
         for path in before.keys() | after.keys()
         if before.get(path) != after.get(path)
     )
-

@@ -15,3 +15,5 @@ class AgentAdapter(ABC):
     ) -> Action:
         raise NotImplementedError
 
+    def metrics(self) -> dict[str, Any]:
+        return {}

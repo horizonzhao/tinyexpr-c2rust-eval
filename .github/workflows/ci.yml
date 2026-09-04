@@ -30,8 +30,22 @@ jobs:
         working-directory: agent-harness
         run: python -m pytest -q
 
-      - name: Validate baseline task
-        run: c2rust-agent validate .\agent-harness\tasks\tinyexpr-baseline.yaml
+      - name: Validate all task manifests
+        run: |
+          Get-ChildItem .\agent-harness\tasks\*.yaml | ForEach-Object {
+            c2rust-agent validate $_.FullName
+          }
+
+      - name: Check benchmark fixture formatting
+        run: |
+          Get-ChildItem .\agent-harness\benchmarks -Directory | ForEach-Object {
+            Push-Location $_.FullName
+            cargo fmt --all -- --check
+            Pop-Location
+          }
+
+      - name: Run read-only baseline
+        run: c2rust-agent run .\agent-harness\tasks\tinyexpr-baseline.yaml --agent replay
 
   # ==============================================================
   # 任务 1：Rust 代码格式、静态检查、单元测试

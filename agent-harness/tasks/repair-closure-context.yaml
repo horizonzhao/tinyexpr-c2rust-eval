@@ -1,0 +1,17 @@
+id: repair-closure-context
+title: 修复闭包上下文传递
+problem: >-
+  evaluate_closure 调用函数时创建了默认上下文，导致注册时携带的 scale 和 offset 丢失。
+  修复上下文传递，同时保持现有公开接口不变。
+repository_root: ../benchmarks/closure-context
+workspace_mode: copy
+policy:
+  allowed_paths: [src]
+  read_only_paths: [Cargo.toml, Cargo.lock, tests]
+  allowed_command_prefixes: [cargo test, cargo clippy, cargo fmt]
+budget: {max_steps: 20, max_seconds: 900}
+verify:
+  - {name: format, command: "cargo fmt --all -- --check", weight: 1}
+  - {name: clippy, command: "cargo clippy --all-targets -- -D warnings", weight: 2}
+  - {name: behavior, command: "cargo test --all", weight: 7}
+metadata: {category: closure-context, source_finding: closure-translation}

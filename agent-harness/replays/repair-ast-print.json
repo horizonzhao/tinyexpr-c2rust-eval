@@ -1,0 +1,4 @@
+[
+  {"type":"run_command","command":"cargo test --all","cwd":"."},
+  {"type":"finish","message":"基线诊断完成。"}
+]

@@ -1,0 +1,17 @@
+id: repair-optimizer-purity
+title: 防止常量折叠消除副作用
+problem: >-
+  optimize 当前把所有 Call 都折叠成常量，错误地消除了非纯函数的运行时调用。
+  仅允许折叠 pure=true 的调用，并保持可继续折叠的纯算术表达式。
+repository_root: ../benchmarks/optimizer-purity
+workspace_mode: copy
+policy:
+  allowed_paths: [src]
+  read_only_paths: [Cargo.toml, Cargo.lock, tests]
+  allowed_command_prefixes: [cargo test, cargo clippy, cargo fmt]
+budget: {max_steps: 25, max_seconds: 900}
+verify:
+  - {name: format, command: "cargo fmt --all -- --check", weight: 1}
+  - {name: clippy, command: "cargo clippy --all-targets -- -D warnings", weight: 2}
+  - {name: behavior, command: "cargo test --all", weight: 7}
+metadata: {category: optimizer-semantics, source_finding: F-005}

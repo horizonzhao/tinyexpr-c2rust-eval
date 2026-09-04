@@ -543,6 +543,7 @@ fn token_arity(tok: Token) -> usize {
     }
 }
 
+#[allow(clippy::vec_box)]
 fn build_call(tok: Token, args: Vec<Box<Expr>>) -> Box<Expr> {
     match tok {
         Token::Function { pure, func } => Box::new(Expr::Function { pure, func, args }),
@@ -748,7 +749,7 @@ fn optimize(n: &mut Box<Expr>) {
         _ => return, // impure — do not fold
     };
     if should_fold {
-        let val = te_eval(&**n);
+        let val = te_eval(n);
         **n = Expr::Constant(val);
     }
 }
@@ -849,9 +850,9 @@ mod tests {
 
     #[test]
     fn variable_eval() {
-        let x: f64 = 3.14;
+        let x: f64 = 3.125;
         let expr = Expr::Variable(&x as *const f64);
-        assert_eq!(te_eval(&expr), 3.14);
+        assert_eq!(te_eval(&expr), 3.125);
     }
 
     #[test]
@@ -934,7 +935,7 @@ mod tests {
     #[test]
     fn interp_literal() {
         assert_eq!(interp("42"), 42.0);
-        assert_eq!(interp("3.14"), 3.14);
+        assert_eq!(interp("3.125"), 3.125);
     }
 
     #[test]
@@ -1053,7 +1054,7 @@ mod tests {
 
     #[test]
     fn lex_number_decimal() {
-        assert!(matches!(tok("3.14"), Token::Number(v) if (v - 3.14).abs() < 1e-10));
+        assert!(matches!(tok("3.125"), Token::Number(v) if (v - 3.125).abs() < 1e-10));
     }
 
     #[test]

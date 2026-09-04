@@ -58,8 +58,18 @@ function Invoke-Repl {
     }
 }
 
+function Normalize-ReplOutput {
+    param([string]$output)
+    # Interactive prompts may be emitted before or after stderr depending on
+    # buffering. They are transport noise, not part of the expression result.
+    return (($output -replace '>', ' ') -replace '\s+', ' ').Trim()
+}
+
 function Compare-Output {
     param([string]$c, [string]$r)
+    $c = Normalize-ReplOutput $c
+    $r = Normalize-ReplOutput $r
+
     # 完全一致
     if ($c -eq $r) { return @{ Match = $true; Reason = "exact" } }
 

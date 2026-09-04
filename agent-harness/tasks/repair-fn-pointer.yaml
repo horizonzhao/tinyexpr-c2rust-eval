@@ -1,0 +1,17 @@
+id: repair-fn-pointer
+title: 修复不可靠的函数指针比较
+problem: >-
+  same_operation 使用直接函数指针比较，Rust 明确警告该比较结果可能受代码生成影响。
+  在保持接口和行为测试通过的前提下消除 -D warnings。不得修改测试或 Cargo.toml。
+repository_root: ../benchmarks/fn-pointer
+workspace_mode: copy
+policy:
+  allowed_paths: [src]
+  read_only_paths: [Cargo.toml, Cargo.lock, tests]
+  allowed_command_prefixes: [cargo test, cargo clippy, cargo fmt]
+budget: {max_steps: 20, max_seconds: 900}
+verify:
+  - {name: format, command: "cargo fmt --all -- --check", weight: 1}
+  - {name: clippy, command: "cargo clippy --all-targets -- -D warnings", weight: 5}
+  - {name: behavior, command: "cargo test --all", weight: 4}
+metadata: {category: fn-pointer, source_finding: F-001}
