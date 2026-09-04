@@ -9,7 +9,7 @@
 
 因此，这个仓库不只是一个 Rust 移植结果，也是一套从真实迁移案例中构造 Coding Agent benchmark 的完整样例。
 
-## 项目要回答的问题
+## 核心问题
 
 - Coding Agent 能否产出可编译、可测试、行为与 C 基准一致的 Rust 实现？
 - 哪些迁移问题可以通过编译器和单元测试发现，哪些必须依靠跨语言对照测试？
@@ -269,7 +269,7 @@ agent-harness/runs/<task>-<agent>-<UTC timestamp>/
 
 ## 当前评测结果
 
-2026-09-04 使用 `deepseek-v4-flash` 顺序执行 8 个修复任务，结果如下：
+使用 `deepseek-v4-flash` 顺序执行 8 个修复任务，结果如下：
 
 | 指标 | 结果 |
 |---|---:|
