@@ -20,10 +20,13 @@
 - `data/`：指标、测试集与会话统计。
 - `scripts/`：初始化、对照、汇总自动化脚本。
 - `.claude/`：交互协议与提示模板。
+- `agent-harness/`：coding agent 任务运行、策略约束、轨迹记录与评测报告。
 
 ## 3. 信息流
 
 `tinyexpr-c/` → 翻译到 `tinyexpr-rs/` → 验证（单测 + 对照）→ 记录到 `logs/` 与 `data/` → 提炼 `FINDINGS.md` → 汇总到 `CONCLUSIONS.md`。
+
+新增评测流：`agent-harness/tasks/` → agent adapter → policy + workspace → verifier → `agent-harness/runs/`。
 
 ## 4. 推荐阅读路径
 

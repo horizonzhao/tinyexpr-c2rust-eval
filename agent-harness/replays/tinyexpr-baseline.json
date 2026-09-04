@@ -1,0 +1,12 @@
+[
+  {
+    "type": "run_command",
+    "command": "cargo test --all",
+    "cwd": "tinyexpr-rs"
+  },
+  {
+    "type": "finish",
+    "message": "Existing Rust unit tests pass; baseline established."
+  }
+]
+

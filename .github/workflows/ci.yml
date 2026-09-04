@@ -8,6 +8,31 @@ on:
   workflow_dispatch:
 
 jobs:
+  agent-harness:
+    name: Coding Agent Harness
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: agent-harness/pyproject.toml
+
+      - name: Install harness
+        run: python -m pip install -e .\agent-harness pytest
+
+      - name: Run harness tests
+        working-directory: agent-harness
+        run: python -m pytest -q
+
+      - name: Validate baseline task
+        run: c2rust-agent validate .\agent-harness\tasks\tinyexpr-baseline.yaml
+
   # ==============================================================
   # 任务 1：Rust 代码格式、静态检查、单元测试
   # ==============================================================

@@ -16,6 +16,24 @@
 - `data/test_cases.csv`：C/Rust 对照测试集
 - `logs/raw-journal.md`：原始过程日志
 
+## Coding Agent Harness
+
+仓库新增了独立的 [`agent-harness/`](agent-harness/) 模块，将原有单次实验扩展为可重复运行的 coding-agent 评测框架，同时保持 C 基准、Rust 产物和历史实验记录不变。
+
+当前 MVP 支持：
+
+- YAML 任务清单与步骤、时间、路径、命令预算
+- Replay 与外部命令两类 agent adapter
+- 修改范围检查和确定性验证
+- JSONL 完整执行轨迹
+- JSON 与 Markdown 评测报告
+
+```powershell
+python -m pip install -e .\agent-harness
+c2rust-agent validate .\agent-harness\tasks\tinyexpr-baseline.yaml
+c2rust-agent run .\agent-harness\tasks\tinyexpr-baseline.yaml --agent replay
+```
+
 ## 复现实验
 
 ```powershell

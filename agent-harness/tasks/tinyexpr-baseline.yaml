@@ -1,0 +1,28 @@
+id: tinyexpr-baseline
+title: Verify the existing tinyexpr Rust translation
+problem: >-
+  Inspect the existing translation and establish a reproducible baseline by
+  running its unit tests. Do not modify the repository.
+repository_root: ../..
+policy:
+  allowed_paths: []
+  read_only_paths:
+    - tinyexpr-c
+    - tinyexpr-rs
+    - data
+    - docs
+    - logs
+    - scripts
+  allowed_command_prefixes:
+    - cargo test
+budget:
+  max_steps: 3
+  max_seconds: 600
+verify:
+  - command: cargo test --all
+    cwd: tinyexpr-rs
+    timeout_seconds: 300
+metadata:
+  category: baseline
+  language_pair: C-to-Rust
+
