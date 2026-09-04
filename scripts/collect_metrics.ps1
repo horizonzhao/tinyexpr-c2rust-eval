@@ -38,18 +38,28 @@ if ($total -eq 0) {
     $rsTotalLoc = 0
     $avgRounds = 0
 } else {
+    $roundValues = @(
+        $records | ForEach-Object {
+            $value = 0
+            if ([int]::TryParse($_.rounds, [ref]$value)) { $value }
+        }
+    )
     $firstTryCompiled = ($records | Where-Object { $_.first_try_compiled -eq "yes" }).Count
     $firstTryTested = ($records | Where-Object { $_.first_try_tested -eq "yes" }).Count
     $usedUnsafe = ($records | Where-Object { $_.used_unsafe -eq "yes" }).Count
-    $rounds1 = ($records | Where-Object { [int]$_.rounds -le 1 }).Count
-    $rounds2 = ($records | Where-Object { [int]$_.rounds -eq 2 }).Count
-    $rounds3plus = ($records | Where-Object { [int]$_.rounds -ge 3 }).Count
+    $rounds1 = @($roundValues | Where-Object { $_ -le 1 }).Count
+    $rounds2 = @($roundValues | Where-Object { $_ -eq 2 }).Count
+    $rounds3plus = @($roundValues | Where-Object { $_ -ge 3 }).Count
     $interventionNone = ($records | Where-Object { $_.human_intervention -eq "none" }).Count
     $interventionHint = ($records | Where-Object { $_.human_intervention -eq "hint" }).Count
     $interventionRedesign = ($records | Where-Object { $_.human_intervention -eq "redesign" }).Count
     $cTotalLoc = ($records | Measure-Object -Property c_loc -Sum).Sum
     $rsTotalLoc = ($records | Measure-Object -Property rust_loc -Sum).Sum
-    $avgRounds = [math]::Round(($records | Measure-Object -Property rounds -Average).Average, 2)
+    $avgRounds = if ($roundValues.Count -gt 0) {
+        [math]::Round(($roundValues | Measure-Object -Average).Average, 2)
+    } else {
+        0
+    }
 }
 
 function Pct([int]$part, [int]$whole) {

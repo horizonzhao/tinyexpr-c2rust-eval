@@ -1,6 +1,5 @@
 # Rust
 /tinyexpr-rs/target/
-/tinyexpr-rs/Cargo.lock
 **/*.rs.bk
 
 # C 构建产物（保留源码，忽略二进制）
@@ -33,6 +32,8 @@ desktop.ini
 /tinyexpr-rs/compare_result.csv
 /compare_result.csv
 /data/compare_result.csv
+/data/metrics_summary.md
+/data/findings_candidates.md
 
 # Python（如果有辅助脚本）
 __pycache__/
